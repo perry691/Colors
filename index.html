@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>颜色学习游戏 - 点击色块学习英文颜色名称</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #36D1DC;
+            --light: #F8F9FA;
+            --dark: #2D3748;
+            --text: #4A5568;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(108, 99, 255, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .instructions {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .instructions h3 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions p {
+            line-height: 1.6;
+        }
+        
+        .color-display {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .color-name {
+            font-size: 5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .color-hex {
+            font-size: 1.5rem;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+        
+        .color-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .category {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 12px;
+        }
+        
+        .color-item {
+            height: 80px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .color-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .color-item.active {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 3px white, 0 0 0 6px var(--primary);
+        }
+        
+        .color-label {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .color-item:hover .color-label {
+            opacity: 1;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .reset-btn {
+            background: white;
+            color: var(--text);
+            border: 2px solid #E2E8F0;
+        }
+        
+        .reset-btn:hover {
+            background: #F7FAFC;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .speak-btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+        
+        .speak-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(108, 99, 255, 0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .color-name {
+                font-size: 3.5rem;
+            }
+            
+            .color-categories {
+                grid-template-columns: 1fr;
+            }
+            
+            .color-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+            
+            .color-item {
+                height: 70px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>颜色学习游戏</h1>
+            <p class="subtitle">点击色块学习英文颜色名称 - 基于颜色词表设计</p>
+        </header>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+            <p>点击下方任意色块，该颜色的英文名称会以大字显示在屏幕上。点击"朗读"按钮可以听到英文发音。</p>
+        </div>
+        
+        <div class="color-display" id="colorDisplay">
+            <div class="color-name" id="colorName">Color Name</div>
+            <div class="color-hex" id="colorHex">#FFFFFF</div>
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn reset-btn" id="resetBtn">
+                <i class="fas fa-redo"></i>
+                重置
+            </button>
+            <button class="control-btn speak-btn" id="speakBtn">
+                <i class="fas fa-volume-up"></i>
+                朗读
+            </button>
+        </div>
+        
+        <div class="color-categories" id="colorCategories">
+            <!-- 颜色分类将由JavaScript动态生成 -->
+        </div>
+        
+        <div class="footer">
+            <p>颜色学习工具 - 基于颜色词表设计 | 适用于英语颜色名称教学</p>
+        </div>
+    </div>
+
+    <script>
+        // 颜色数据 - 基于提供的颜色词表
+        const colorData = [
+            { category: "YELLOW", colors: [
+                { name: "YELLOW", hex: "#FFEF00" },
+                { name: "MELLOW", hex: "#F8DE7E" },
+                { name: "CYBER", hex: "#FFD300" },
+                { name: "ROYAL", hex: "#FADA5E" },
+                { name: "TROMBONE", hex: "#D2B55B" },
+                { name: "BANANA", hex: "#FCF4A3" },
+                { name: "TUSCANY", hex: "#FCD12A" },
+                { name: "LEMON", hex: "#FFFDD0" },
+                { name: "BUMBLEBEE", hex: "#FCE205" },
+                { name: "FLAX", hex: "#EEDC82" },
+                { name: "CREAM", hex: "#FFFDD0" },
+                { name: "PEACH", hex: "#FFE5B4" },
+                { name: "LAGUNA", hex: "#F8E473" },
+                { name: "MUSTARD", hex: "#FFDB58" },
+                { name: "ECRU", hex: "#C2B280" },
+                { name: "CORN", hex: "#FBEC5D" },
+                { name: "PINEAPPLE", hex: "#FEE12B" },
+                { name: "FLAXEN", hex: "#EEDC82" },
+                { name: "EGG NOG", hex: "#FAE29C" },
+                { name: "SEPIA", hex: "#E57B78" }
+            ]},
+            { category: "ORANGE", colors: [
+                { name: "ORANGE", hex: "#FFA500" },
+                { name: "COLD", hex: "#F9A602" },
+                { name: "GOLDENROD", hex: "#DAA520" },
+                { name: "PUMPKIN", hex: "#FF7518" },
+                { name: "FIRE", hex: "#FF8C00" },
+                { name: "OCHRE", hex: "#CC7722" },
+                { name: "AMBER", hex: "#FFBF00" },
+                { name: "DIJON", hex: "#C49102" },
+                { name: "TANGERINE", hex: "#F28500" },
+                { name: "TIGER", hex: "#FD6A02" },
+                { name: "HONEY", hex: "#EB9605" },
+                { name: "CARROT", hex: "#ED9121" },
+                { name: "APRICOT", hex: "#FBCEB1" },
+                { name: "BRONZE", hex: "#CD7F32" },
+                { name: "COPPER", hex: "#B87333" },
+                { name: "LAVA", hex: "#CF1020" },
+                { name: "RUST", hex: "#B7410E" },
+                { name: "AMBER", hex: "#FF7E00" },
+                { name: "SPICE", hex: "#7B3F00" },
+                { name: "BURNT ORANGE", hex: "#CC5500" }
+            ]},
+            { category: "RED", colors: [
+                { name: "RED", hex: "#FF0000" },
+                { name: "SALMON", hex: "#FA8072" },
+                { name: "SCARLET", hex: "#FF2400" },
+                { name: "BARN RED", hex: "#7C0A02" },
+                { name: "IMPERIAL", hex: "#ED2939" },
+                { name: "INDIAN RED", hex: "#CD5C5C" },
+                { name: "CHILI", hex: "#C21807" },
+                { name: "FIRE BRICK", hex: "#B22222" },
+                { name: "MAROON", hex: "#800000" },
+                { name: "REDWOOD", hex: "#A45A52" },
+                { name: "RASPBERRY", hex: "#E30B5D" },
+                { name: "CANDY APPLE", hex: "#FF0800" },
+                { name: "CARMINE", hex: "#960018" },
+                { name: "PERSIAN", hex: "#CA3433" },
+                { name: "U.S. FLAG", hex: "#B31942" },
+                { name: "FERRARI", hex: "#FF2800" },
+                { name: "BURGUNDY", hex: "#800020" },
+                { name: "CRIMSON", hex: "#DC143C" },
+                { name: "SANGRIA", hex: "#92000A" },
+                { name: "MAHOGANY", hex: "#C04000" }
+            ]},
+            { category: "PINK", colors: [
+                { name: "PINK", hex: "#FFC0CB" },
+                { name: "RUBY", hex: "#E0115F" },
+                { name: "ULTRA", hex: "#FF6FFF" },
+                { name: "THULIAN", hex: "#DE6FA1" },
+                { name: "MAGENTA", hex: "#FF00FF" },
+                { name: "ROSE PINK", hex: "#FF66CC" },
+                { name: "GERMAN", hex: "#FF0080" },
+                { name: "FUCHSIA", hex: "#FF00FF" },
+                { name: "FRENCH ROSE", hex: "#F64A8A" },
+                { name: "CERISE", hex: "#DE3163" },
+                { name: "CARNATION", hex: "#FFA6C9" },
+                { name: "BRICK", hex: "#FB607F" },
+                { name: "AMARANTH", hex: "#E52B50" },
+                { name: "UMBER", hex: "#F64A8A" },
+                { name: "BUBBLE GUM", hex: "#FFC1CC" },
+                { name: "HOT PINK", hex: "#FF69B4" },
+                { name: "PUNCH", hex: "#EC5578" },
+                { name: "LEMONADE", hex: "#FDBDC3" },
+                { name: "FLAMINGO", hex: "#FC8EAC" }
+            ]},
+            { category: "VIOLET", colors: [
+                { name: "VIOLET", hex: "#8F00FF" },
+                { name: "HIBISCUS", hex: "#B43757" },
+                { name: "MAUVE", hex: "#E0B0FF" },
+                { name: "MULBERRY", hex: "#C54B8C" },
+                { name: "ORCHID", hex: "#DA70D6" },
+                { name: "LILAC", hex: "#C8A2C8" },
+                { name: "ELECTRIC", hex: "#8F00FF" },
+                { name: "GRAPE", hex: "#6F2DA8" },
+                { name: "AMETHYST", hex: "#9966CC" },
+                { name: "BYZANTINE", hex: "#BD33A4" },
+                { name: "FANDANGO", hex: "#B53389" },
+                { name: "HELIOTROPE", hex: "#DF73FF" },
+                { name: "HOMA", hex: "#B347DE" },
+                { name: "ROYAL", hex: "#7851A9" },
+                { name: "LOLLIPOP", hex: "#FF00FF" },
+                { name: "PLUM", hex: "#8E4585" },
+                { name: "EGGPLANT", hex: "#614051" }
+            ]},
+            { category: "BLUE", colors: [
+                { name: "BLUE", hex: "#0000FF" },
+                { name: "DENIM", hex: "#1560BD" },
+                { name: "PIGEON", hex: "#606B78" },
+                { name: "SKY", hex: "#87CEEB" },
+                { name: "INDEPENDENCE", hex: "#4C516D" },
+                { name: "AIR FORCE", hex: "#5D8AA8" },
+                { name: "BABY BLUE", hex: "#89CFF0" },
+                { name: "NAVY", hex: "#000080" },
+                { name: "STEEL", hex: "#4682B4" },
+                { name: "GROTTO", hex: "#5CACEE" },
+                { name: "TURKISH", hex: "#5090B5" },
+                { name: "MAYA", hex: "#73C2FB" },
+                { name: "CORNFLOWER", hex: "#6495ED" },
+                { name: "OLYMPIC", hex: "#008ECC" },
+                { name: "SAPPHIRE", hex: "#0F52BA" },
+                { name: "AZURE", hex: "#007FFF" },
+                { name: "EGYPTIAN", hex: "#1034A6" },
+                { name: "YALE", hex: "#0F4D92" },
+                { name: "RUSSIAN", hex: "#003153" },
+                { name: "SPACE", hex: "#1D2951" }
+            ]},
+            { category: "GREEN", colors: [
+                { name: "GREEN", hex: "#008000" },
+                { name: "FOREST", hex: "#228B22" },
+                { name: "SAGE", hex: "#BCB88A" },
+                { name: "OLIVE", hex: "#808000" },
+                { name: "LIME", hex: "#00FF00" },
+                { name: "HUNTER", hex: "#355E3B" },
+                { name: "JADE", hex: "#00A86B" },
+                { name: "ARMY", hex: "#4B5320" },
+                { name: "FEEN", hex: "#4F7942" },
+                { name: "JUNGLE", hex: "#29AB87" },
+                { name: "LAUREL", hex: "#A9BA9D" },
+                { name: "MOSS", hex: "#8A9A5B" },
+                { name: "MINT", hex: "#3EB489" },
+                { name: "PINE", hex: "#01796F" },
+                { name: "TEA", hex: "#C1E1C1" },
+                { name: "ARMY", hex: "#4B5320" },
+                { name: "EMERALD", hex: "#50C878" },
+                { name: "KELLY", hex: "#4CBB17" },
+                { name: "SACRAMENTO", hex: "#043927" },
+                { name: "SEA", hex: "#2E8B57" }
+            ]},
+            { category: "BROWN", colors: [
+                { name: "BROWN", hex: "#A52A2A" },
+                { name: "GEAR", hex: "#8B4513" },
+                { name: "CINNAMON", hex: "#D2691E" },
+                { name: "BRUNETTE", hex: "#3A1F04" },
+                { name: "TAWNY", hex: "#CD5700" },
+                { name: "UMBER", hex: "#635147" },
+                { name: "CHOCOLATE", hex: "#7B3F00" },
+                { name: "SYRUP", hex: "#3D2200" },
+                { name: "GINGERBREAD", hex: "#5C2610" },
+                { name: "CARAMEL", hex: "#AF6E13" },
+                { name: "WALNUT", hex: "#773F1A" },
+                { name: "PECAN", hex: "#A67B5B" },
+                { name: "WOOD", hex: "#966F33" },
+                { name: "HICKORY", hex: "#371804" },
+                { name: "ESPRESSO", hex: "#612718" },
+                { name: "PEANUT", hex: "#7F4C1C" },
+                { name: "MOCHA", hex: "#6F372D" },
+                { name: "COFFEE", hex: "#6F4E37" },
+                { name: "RUSSET", hex: "#80461B" }
+            ]},
+            { category: "GRAY", colors: [
+                { name: "GRAY", hex: "#808080" },
+                { name: "FOG", hex: "#C5C6C7" },
+                { name: "TANK", hex: "#8A897C" },
+                { name: "PEARL RIVER", hex: "#D6D6D6" },
+                { name: "ABALONE", hex: "#D6CFC7" },
+                { name: "HARBOR GRAY", hex: "#C7C6C1" },
+                { name: "SMOKE", hex: "#848884" },
+                { name: "THUNDER", hex: "#BDB7AB" },
+                { name: "Pewter", hex: "#899499" },
+                { name: "STEEL", hex: "#71797E" },
+                { name: "STONE", hex: "#928E85" },
+                { name: "IRON", hex: "#A19D94" },
+                { name: "RHINO", hex: "#8A8A8A" },
+                { name: "TROUT", hex: "#97978F" },
+                { name: "SEA", hex: "#81878B" },
+                { name: "LAVA", hex: "#869C9B" },
+                { name: "SHADOW", hex: "#8A795D" },
+                { name: "ASH", hex: "#B2BEB5" },
+                { name: "ANCHOR", hex: "#464647" },
+                { name: "CHARCOAL", hex: "#36454F" }
+            ]}
+        ];
+
+        // 初始化页面
+        function initPage() {
+            const colorCategories = document.getElementById('colorCategories');
+            
+            // 生成颜色分类和色块
+            colorData.forEach(category => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = 'category fade-in';
+                
+                const title = document.createElement('div');
+                title.className = 'category-title';
+                title.textContent = category.category;
+                categoryElement.appendChild(title);
+                
+                const colorGrid = document.createElement('div');
+                colorGrid.className = 'color-grid';
+                
+                category.colors.forEach(color => {
+                    const colorItem = document.createElement('div');
+                    colorItem.className = 'color-item';
+                    colorItem.style.backgroundColor = color.hex;
+                    colorItem.dataset.name = color.name;
+                    colorItem.dataset.hex = color.hex;
+                    
+                    const colorLabel = document.createElement('div');
+                    colorLabel.className = 'color-label';
+                    colorLabel.textContent = color.name;
+                    colorItem.appendChild(colorLabel);
+                    
+                    colorItem.addEventListener('click', () => selectColor(color.name, color.hex));
+                    
+                    colorGrid.appendChild(colorItem);
+                });
+                
+                categoryElement.appendChild(colorGrid);
+                colorCategories.appendChild(categoryElement);
+            });
+            
+            // 设置重置按钮
+            document.getElementById('resetBtn').addEventListener('click', resetDisplay);
+            
+            // 设置朗读按钮
+            document.getElementById('speakBtn').addEventListener('click', speakColorName);
+        }
+        
+        // 选择颜色
+        function selectColor(name, hex) {
+            // 更新显示
+            const colorName = document.getElementById('colorName');
+            const colorHex = document.getElementById('colorHex');
+            const colorDisplay = document.getElementById('colorDisplay');
+            
+            colorName.textContent = name;
+            colorHex.textContent = hex;
+            colorDisplay.style.backgroundColor = hex;
+            
+            // 更新文本颜色以确保可读性
+            const textColor = getContrastColor(hex);
+            colorName.style.color = textColor;
+            colorHex.style.color = textColor;
+            
+            // 添加动画效果
+            colorName.classList.add('pulse');
+            setTimeout(() => {
+                colorName.classList.remove('pulse');
+            }, 1500);
+            
+            // 移除之前的选择
+            document.querySelectorAll('.color-item.active').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 标记当前选择的颜色
+            document.querySelectorAll('.color-item').forEach(item => {
+                if (item.dataset.name === name) {
+                    item.classList.add('active');
+                }
+            });
+        }
+        
+        // 获取对比色（确保文本可读性）
+        function getContrastColor(hex) {
+            // 转换hex为RGB
+            const r = parseInt(hex.substr(1, 2), 16);
+            const g = parseInt(hex.substr(3, 2), 16);
+            const b = parseInt(hex.substr(5, 2), 16);
+            
+            // 计算亮度
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            
+            // 根据亮度返回黑色或白色
+            return brightness > 128 ? '#000000' : '#FFFFFF';
+        }
+        
+        // 重置显示
+        function resetDisplay() {
+            const colorName = document.getElementById('colorName');
+            const colorHex = document.getElementById('colorHex');
+            const colorDisplay = document.getElementById('colorDisplay');
+            
+            colorName.textContent = 'Color Name';
+            colorHex.textContent = '#FFFFFF';
+            colorDisplay.style.backgroundColor = '#FFFFFF';
+            colorName.style.color = '#4A5568';
+            colorHex.style.color = '#4A5568';
+            
+            // 移除所有激活状态
+            document.querySelectorAll('.color-item.active').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+        
+        // 朗读颜色名称
+        function speakColorName() {
+            const colorName = document.getElementById('colorName').textContent;
+            if (colorName && colorName !== 'Color Name') {
+                const utterance = new SpeechSynthesisUtterance(colorName);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            initPage();
+        });
+    </script>
+</body>
+</html>
